@@ -1,3 +1,5 @@
+import allure
+from selenium.webdriver import Keys
 from selenium.webdriver.common.by import By
 from .base_page import BasePage
 from selenium.webdriver.support.wait import WebDriverWait
@@ -24,49 +26,39 @@ class OrderPage(BasePage):
     confirm_button = (By.XPATH, "//button[text()='Да']")
     success_window = (By.CSS_SELECTOR, ".Order_ModalHeader__3FDaJ")
 
+    @allure.step('Заполняем 1/2 часть анкеты на заказ самоката')
     def fill_step1(self, name, last_name, address, metro, phone):
-        self.find_element(self.name_input).send_keys(name)
-        self.find_element(self.last_name_input).send_keys(last_name)
-        self.find_element(self.address_input).send_keys(address)
-        metro_field = self.find_element(self.metro_input)
-        metro_field.click()
-        metro_field.send_keys(metro.split()[0])
-        metro_option_locator = (By.XPATH, f"//div[contains(text(), '{metro}')]")
-        metro_option = WebDriverWait(self.driver, 15).until(
-            EC.visibility_of_element_located(metro_option_locator)
-        )
-        self.driver.execute_script("arguments[0].click();", metro_option)
-        self.find_element(self.phone_input).send_keys(phone)
-        next_btn = self.find_element(self.next_button)
-        self.driver.execute_script("arguments[0].scrollIntoView();", next_btn)
-        next_btn.click()
+        self.send_keys(self.name_input, name)
+        self.send_keys(self.last_name_input, last_name)
+        self.send_keys(self.address_input, address)
+        self.click_element(self.metro_input)
+        self.send_keys(self.metro_input, metro.split()[0])
+        metro_locator = (self.metro_option[0], self.metro_option[1].format(metro))
+        metro_option = self.wait_until_clickable(metro_locator, timeout=15)
+        metro_option.click()
+        self.send_keys(self.phone_input, phone)
+        self.scroll_to_element(self.next_button)
+        self.click_element(self.next_button)
 
+    @allure.step('Заполняем 2/2 часть анкеты на заказ самоката')
     def fill_step2(self, date, period, color, comment):
         # Установка даты
         date_field = self.find_element(self.date_input)
         date_field.send_keys(date)
-        self.find_element(self.rental_period).click()
-        period_locator = (By.XPATH, f"//div[text()='{period}']")
-        period_option = WebDriverWait(self.driver, 10).until(
-            EC.element_to_be_clickable(period_locator)
-        )
+        date_field.send_keys(Keys.ENTER)
+        self.click_element(self.rental_period)
+        period_locator = (self.rental_option[0], self.rental_option[1].format(period))
+        period_option = self.wait_until_clickable(period_locator)
         period_option.click()
-        color_locator = (By.ID, color)
-        self.find_element(color_locator).click()
-        self.find_element(self.comment_input).send_keys(comment)
-        order_btn = self.find_element(self.order_button)
-        self.driver.execute_script("arguments[0].scrollIntoView();", order_btn)
-        self.driver.execute_script("arguments[0].click();", order_btn)
-        confirm_btn = WebDriverWait(self.driver, 15).until(
-            EC.element_to_be_clickable(self.confirm_button)
-        )
-        confirm_btn.click()
+        color_locator = (self.color_checkbox[0], self.color_checkbox[1].format(color))
+        self.click_element(color_locator)
+        self.send_keys(self.comment_input, comment)
+        self.scroll_to_element(self.order_button)
+        order_button = self.wait_until_clickable(self.order_button)
+        self.action_click(order_button)
+        confirm_button = self.wait_until_clickable(self.confirm_button, timeout=20)
+        confirm_button.click()
 
+    @allure.step('Дожидаемся появления окна с подтверждением заказа')
     def is_success_displayed(self):
-        try:
-            return WebDriverWait(self.driver, 20).until(
-                EC.visibility_of_element_located(self.success_window)
-            ).is_displayed()
-        except:
-            self.driver.save_screenshot("order_success_error.png")
-            return False
+        return self.is_element_displayed(self.success_window, timeout=20)
