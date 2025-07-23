@@ -2,7 +2,7 @@ import pytest
 import allure
 from pages.main_page import MainPage
 from pages.order_page import OrderPage
-from order_data import *
+from data import *
 
 
 class TestOrderFlow:

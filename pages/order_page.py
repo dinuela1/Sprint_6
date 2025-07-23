@@ -1,9 +1,7 @@
 import allure
 from selenium.webdriver import Keys
 from selenium.webdriver.common.by import By
-from .base_page import BasePage
-from selenium.webdriver.support.wait import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
+from pages.base_page import BasePage
 
 
 class OrderPage(BasePage):
@@ -32,7 +30,7 @@ class OrderPage(BasePage):
         self.send_keys(self.last_name_input, last_name)
         self.send_keys(self.address_input, address)
         self.click_element(self.metro_input)
-        self.send_keys(self.metro_input, metro.split()[0])
+        self.send_keys(self.metro_input, metro.split())
         metro_locator = (self.metro_option[0], self.metro_option[1].format(metro))
         metro_option = self.wait_until_clickable(metro_locator, timeout=15)
         metro_option.click()
