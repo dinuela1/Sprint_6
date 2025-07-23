@@ -87,12 +87,12 @@ class BasePage:
         except TimeoutException:
             return False
 
-    #@allure.step("Переключиться на окно #{index}")
-    #def switch_to_window(self, index=0):
-     #   WebDriverWait(self.driver, self.default_timeout).until(
-      #      lambda d: len(d.window_handles) > index
-       # )
-        #self.driver.switch_to.window(self.driver.window_handles[index])
+    @allure.step("Переключиться на окно #{index}")
+    def switch_to_window(self, index=0):
+        WebDriverWait(self.driver, self.default_timeout).until(
+            lambda d: len(d.window_handles) > index
+        )
+        self.driver.switch_to.window(self.driver.window_handles[index])
 
     @allure.step("Ожидать текст '{text}' в URL")
     def wait_for_url_contains(self, text, timeout=None):
@@ -108,5 +108,5 @@ class BasePage:
         actions.move_to_element(element).click().perform()
 
     @allure.step("Пролистать блок FAQ для проверки всех вопросов")
-    def execute_script_faq(self, "text", faq_element):
-        return self.driver.execute_script("text", faq_element)
+    def execute_script_faq(self, text, faq_element):
+        return self.driver.execute_script(text, faq_element)
